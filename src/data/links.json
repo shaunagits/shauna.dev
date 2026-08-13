@@ -90,6 +90,14 @@
       "variant": "plain",
       "span": 6,
       "tags": ["Nonprofit", "Donate"]
+    },
+    {
+      "_note": "Verified live 2026-08-13: 200 over HTTPS, served by Vercel. Oʻahu only — the site says so itself, and the tag says it here so nobody clicks expecting neighbour-island coverage.",
+      "title": "Hawaiʻi 311",
+      "href": "https://hawaii311.org",
+      "variant": "plain",
+      "span": 6,
+      "tags": ["Civic data", "Oʻahu"]
     }
   ],
 
