@@ -24,38 +24,38 @@ So right now there are two copies of this page:
 Editing here changes nothing on the live site until the cutover below is done.
 Until then, **edit the copy in portfolio-2026**, or do both.
 
-## What was copied, and the one non-obvious dependency
+## What's here
 
-Everything the page needs to build, and nothing else — 21 pages became 1:
+Everything the page needs, and nothing else — 21 pages became 1, 15 files total:
 
 - `src/pages/index.astro` — was `src/pages/links.astro`
-- `src/data/links.json` — all page content; adding a link is a one-entry edit
+- `src/data/links.json` — **all page content**; adding a link is a one-entry edit
 - `src/components/LogoS.astro`, `src/styles/global.css` — the only two imports
-- `public/` — favicons, plus `og-image.jpg` (see below)
+- `public/` — favicons, plus `og-image.jpg`
 
-**`src/content/blog/` is the non-obvious one.** `index.astro` calls
-`getCollection('blog')` to derive the post count and the latest post for the
-Writing section, so all 13 markdown files have to be present or the build
-fails. `content.config.ts` came along for the same reason. No blog *pages* were
-copied, so nothing at `/blog/*` is built here and there is no duplicate content
-— the collection is read, never rendered. The "read the latest" link is an
-absolute URL to `shauna.digital/blog/…`, which is correct and stays that way.
+No integrations, no `sharp`, no content collections. One page, one stylesheet.
 
-The cost: **these 13 files are now duplicated and will drift.** Publish a post
-on shauna.digital and this page's count goes stale. Decide before cutover —
-options are (a) hardcode the count and latest slug in `links.json` and delete
-the content dir, (b) keep syncing the files, (c) fetch the count at build time.
-(a) is the least machinery for a number that changes a few times a year.
+### The Writing section is hardcoded, and will go stale
 
-`og:image` still points at `https://shauna.digital/images/og-image.jpg`. The
-file is copied into `public/images/` so you *can* switch that to a local path,
-but the absolute URL works fine and was left alone.
+This is the one thing that can silently rot. In portfolio-2026 the post count
+and latest post came from `getCollection('blog')`, so they could not be wrong.
+That required this repo to carry all 13 posts and their MDX components purely
+to count them — for a number that changes a few times a year.
+
+Decoupled on 2026-08-13: the values live in `links.json` under `writing`
+(`postCount`, `latestPostSlug`, `latestTitle`, `latestReadTime`), and the blog
+now exists only in portfolio-2026. **Publish a post there and this page is
+wrong until you update those four fields by hand.** Nothing validates them; a
+wrong slug is a 404 nobody notices.
+
+`og:image` points at `https://shauna.digital/images/og-image.jpg`. The file is
+in `public/images/` too, so you can switch to a local path, but the absolute
+URL works and was left alone.
 
 ## Cutover, when you want this folder to be the real site
 
-Not started. Nothing below has been done.
-
-1. `git init` here, push to a new repo
+1. ~~`git init`, push to a new repo~~ — **done 2026-08-13**:
+   <https://github.com/shaunagits/shauna.dev> (public, default `main`)
 2. New Netlify site from that repo — build `npm run build`, publish `dist`
 3. Point `shauna.dev` + `www.shauna.dev` DNS at the new site, provision the cert
    (the current Let's Encrypt cert covers all four names and expires
