@@ -121,8 +121,11 @@ repo (Thread, Countdown, Aloha Animal Outreach, Hawaiʻi 311), which are the
 only ones using the `plain` variant:
 
 ```bash
-curl -sS https://shauna.dev/ | grep -c 'class="bar plain'
+curl -sS https://shauna.dev/ | grep -o 'class="bar plain' | wc -l
 ```
+
+(`grep -o | wc -l`, not `grep -c` — the HTML is minified onto one line, so
+`grep -c` counts that single line and always answers 1.)
 
 **4** = the new site is serving. **0** = still the old one (it has three bars,
 all accented). Seven linked bars total on the new page versus three on the old.
