@@ -101,7 +101,22 @@ here — portfolio-2026 served two because a 21-page build splits shared CSS.
 
 Do not continue until this page looks right.
 
-### 3. Move the domains on Netlify  ← either of us
+### 3. Move the domains on Netlify  ← **UI ONLY. Do not use the API.**
+
+> **Attempted via the API on 2026-08-13 and it failed, taking the apex down for
+> ~3.5 minutes.** Sequence was `updateSite` to drop `shauna.dev` from
+> `byshauna`, then `updateSite` to set it as `custom_domain` on `shauna-dev`.
+> The release succeeded; **the claim returned 422 Unprocessable Entity** and
+> kept returning it, as `custom_domain` and as `domain_aliases`. The CLI
+> surfaces no error body. That strands the domain: released by one site,
+> refused by the other, so `shauna.dev` served an SSL error until rolled back.
+>
+> Rollback was restoring `domain_aliases` on `byshauna` and took ~36 seconds to
+> take effect. The cert survived and still covers all four names.
+>
+> Lesson: two API calls are not atomic and there is no way back if the second
+> one fails. The UI has a supported "domain is in use by another site — move
+> it?" flow that does the reassignment as one operation. **Use it.**
 
 Remove both names from `byshauna` first, or the add on `shauna-dev` will be
 rejected as already claimed.
