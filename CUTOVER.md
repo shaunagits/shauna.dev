@@ -184,7 +184,7 @@ still on `byshauna` and still covers all four names (expires **2026-10-31**).
 
 After step 7, rollback also means reverting that commit in portfolio-2026.
 
-## Continuous deploy: CONFIGURED, NOT YET PROVEN
+## Continuous deploy: WORKING, verified 2026-08-13
 
 Set on 2026-08-13 via `netlify api updateSite`, mirroring how `byshauna` is
 wired — the Netlify **GitHub App** (`installation_id: 5327833`), not a deploy
@@ -195,27 +195,22 @@ provider github · repo shaunagits/shauna.dev · branch main
 cmd "npm run build" · dir dist
 ```
 
-**No build has run through this path yet, so it is unverified.** The one thing
-that can still be wrong is repo access: if the Netlify GitHub App is installed
-with *selected repositories* rather than all, this repo was created after the
-install and may not be included. No API call can grant that — it needs a GitHub
-authorization screen.
+Proven by the next push to `main`, which produced a git-triggered deploy that
+reached `state=ready` on its own. That also settles the open question about
+repo access — the Netlify GitHub App cloned this repo successfully, so it does
+cover it. The resulting build serves byte-identical HTML to a local `npm run
+build`.
 
-### Verify it (needs a deploy, so: not Claude)
+Git-triggered deploys carry the commit message in the deploy `title`; CLI
+deploys have an empty one. That is the quickest way to tell which path built
+what:
 
-Push any commit to `main`, or `shauna-dev` → Deploys → **Trigger deploy**.
-Then watch <https://app.netlify.com/projects/shauna-dev/deploys>.
+```bash
+netlify api listSiteDeploys --data '{"site_id":"72dd58e0-ee14-41fb-be3e-b9d535164274"}' | python3 -c "import json,sys; [print(d['created_at'][:19], d['state'], repr(d.get('title') or '')[:50]) for d in json.load(sys.stdin)[:5]]"
+```
 
-- A deploy appears and succeeds → connected, nothing more to do.
-- A deploy appears and **fails while cloning** → the App cannot see the repo.
-  Fix at <https://github.com/settings/installations> → Netlify → Repository
-  access → add `shauna.dev` (or switch to all repositories). Then retry.
-- **No deploy appears at all** → the webhook side did not attach. Redo it
-  through the UI, which runs the full grant flow: `shauna-dev` → Site
-  configuration → Build & deploy → Continuous deployment → Link repository.
-
-Until a build is seen succeeding here, keep deploying with
-`netlify deploy --build --prod` and do not assume a push is live.
+**Push to `main` is now the way to ship.** `netlify deploy --build --prod`
+still works and is the fallback if a build fails, but it is no longer required.
 
 ## Known loose ends
 
