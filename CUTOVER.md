@@ -1,7 +1,16 @@
 # CUTOVER — making this repo the real shauna.dev
 
-Status: **NOT DONE.** Production `shauna.dev` is still served by portfolio-2026
-via the `byshauna` Netlify site. Nothing in this repo is live.
+Status: **PAUSED AT STEP 3 of 7.** Production `shauna.dev` is still served by
+portfolio-2026 via the `byshauna` Netlify site.
+
+Steps 1 and 2 are done: the new site is built, deployed and verified at
+<https://shauna-dev.netlify.app>. Nothing points at it yet, so nothing is live
+and nothing is at risk while this sits.
+
+Paused on 2026-08-13 because Namecheap was down for scheduled maintenance, and
+step 4 happens there. **Do not start step 3 without being able to finish step 4** —
+they are the pair that opens the `www` gap, and step 3 alone leaves
+`www.shauna.dev` 404ing with no way to close it.
 
 Written 2026-08-13. Supersedes the 5-step sketch in `README.md`.
 
@@ -43,16 +52,35 @@ close together and it is a minute or two.
 If you would rather the gap fall at a time you choose, do step 4 first: `www`
 then 404s until step 3 lands, instead of after.
 
-### 1. Deploy the new site  ← you
+### 1. Deploy the new site  ← you · **DONE 2026-08-13**
 
 Claude cannot run this; `netlify deploy` is denied in
 `~/.claude/settings.json`.
+
+Note: the first attempt failed on an Astro bug, not on anything here.
+`removeEmptyDirs` in `astro/dist/core/fs/index.js` does `readdirSync` then
+`rmdirSync` with no try/catch, racing `cleanServerOutput` deleting the same
+transient `dist/chunks`. It throws ENOENT **after** every page is written, so
+the output was already complete and correct. Ten clean builds could not
+reproduce it; the retry succeeded. If it recurs, just run it again, or deploy
+the good `dist/` directly with `netlify deploy --prod --dir=dist`.
 
 ```bash
 cd /Users/shauna/Desktop/claudecode/shauna.dev && netlify deploy --build --prod
 ```
 
-### 2. Verify the deploy before any domain touches  ← either of us
+### 2. Verify the deploy before any domain touches  ← either of us · **DONE 2026-08-13**
+
+Passed on every check: `200 text/html`; stylesheet same-origin and `text/css`;
+CSP and security headers applied from `netlify.toml`; deployed HTML
+byte-identical to the local `dist/index.html`; zero console errors under the
+live CSP; renders fully styled. Content confirmed — seven linked bars, Island
+Bound correctly non-linking, no Pinterest, canonical `https://shauna.dev/`.
+
+The deploy log reporting "0 assets uploaded" was hash dedup from the failed
+first attempt, not an empty deploy.
+
+Re-run these if anything changes:
 
 Nothing points at this site yet, so this is free to get wrong. Expect `200` and
 `text/html`:
@@ -155,6 +183,24 @@ Same shape as the cutover, same `www` gap, no code change. The old cert is
 still on `byshauna` and still covers all four names (expires **2026-10-31**).
 
 After step 7, rollback also means reverting that commit in portfolio-2026.
+
+## Not wired up: continuous deploy
+
+`shauna-dev` has **no GitHub connection.** The deploy was pushed from a laptop
+with the CLI, so pushing to `shaunagits/shauna.dev` does not rebuild the site —
+unlike portfolio-2026, which auto-deploys on push to `main`.
+
+Until that is connected, every content change needs `netlify deploy --build
+--prod` by hand, and it is entirely possible to push a change and believe it is
+live when it is not.
+
+To connect (Netlify UI — the CLI path for this is interactive and not worth
+scripting): `shauna-dev` → Site configuration → Build & deploy → Continuous
+deployment → **Link repository** → GitHub → `shaunagits/shauna.dev`, branch
+`main`, build `npm run build`, publish `dist`.
+
+Safe to do at any point, before or after the cutover. It changes how deploys
+are triggered, not what is served.
 
 ## Known loose ends
 
