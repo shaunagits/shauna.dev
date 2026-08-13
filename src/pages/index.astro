@@ -1,0 +1,639 @@
+---
+/**
+ * Link-in-bio page for https://shauna.dev/ — the whole site, served at the root.
+ *
+ * Copied out of the portfolio-2026 repo, where it lived at /links and reached
+ * shauna.dev through a host rewrite in netlify.toml. Here it is just the index.
+ * PROD STILL SERVES THE OTHER COPY until this repo gets its own Netlify site;
+ * see README.md before editing, or your change won't go live.
+ *
+ * Canonical is shauna.dev, which is now simply this page's own URL. While both
+ * copies are deployed the canonical is also what keeps shauna.digital/links
+ * from competing with it — do not swap it for a `noindex`, that would
+ * de-index shauna.dev itself.
+ *
+ * Deliberately standalone: no Layout.astro (that carries the portfolio nav,
+ * the scroll-progress bar and an og:url hardcoded to shauna.digital). Only
+ * global.css is imported, so the design tokens stay single-sourced.
+ */
+import '../styles/global.css';
+import LogoS from '../components/LogoS.astro';
+import links from '../data/links.json';
+
+const { meta, contact, socials, bars, upcoming, writing } = links;
+
+// --- Writing section: hardcoded, and that is the tradeoff ----------------
+// In portfolio-2026 these came from getCollection('blog'), so the count and
+// read time could not go stale. That required this repo to carry all 13 posts
+// and their MDX components purely to count them — for a number that changes a
+// few times a year. Decoupled 2026-08-13; the blog now lives only in
+// portfolio-2026. Cost: publishing a post there silently makes this page wrong
+// until links.json is updated by hand.
+const postCount = writing.postCount;
+const latestUrl = `https://shauna.digital/blog/${writing.latestPostSlug}`;
+const latestReadTime = writing.latestReadTime;
+
+/**
+ * Icon artwork, keyed by links.json `socials[].icon`.
+ *
+ * ALL SEVEN ARE THE OFFICIAL MARKS, per CLAUDE.md. The mockup's five line
+ * drawings (Instagram, TikTok, Pinterest, Substack, and a Georgia "E" for
+ * Etsy) were approximations and were replaced 2026-08-12.
+ *
+ * Geometry is the unmodified official glyph, taken from Simple Icons, which
+ * tracks each brand's published brand kit. Each is a single path on a 24x24
+ * viewBox.
+ *
+ * Rendered MONOCHROME via fill="currentColor", not in brand colours. Two
+ * reasons, and both matter:
+ *   - the palette is locked to black + white + one teal (DECISIONS.md), and
+ *     an Instagram gradient or TikTok's cyan/red would break it outright;
+ *   - .ico inverts to a white glyph on an ink fill on hover, which only
+ *     works if the mark inherits colour.
+ * Every one of these brands permits a solid one-colour version of the mark
+ * for exactly this case. The glyphs are unmodified, which is the part their
+ * guidelines actually police.
+ *
+ * The marks remain the trademarks of their owners; they are used here only
+ * to link to Shauna's own profiles.
+ */
+const ICONS: Record<string, string> = {
+  instagram: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg>`,
+  tiktok: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>`,
+  pinterest: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>`,
+  substack: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg>`,
+  etsy: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.559 2.445c0-.325.033-.52.59-.52h7.465c1.3 0 2.02 1.11 2.54 3.193l.42 1.666h1.27c.23-4.728.43-6.784.43-6.784s-3.196.36-5.09.36H6.635L1.521.196v1.37l1.725.326c1.21.24 1.5.496 1.6 1.606 0 0 .11 3.27.11 8.64 0 5.385-.09 8.61-.09 8.61 0 .973-.39 1.333-1.59 1.573l-1.722.33V24l5.13-.165h8.55c1.935 0 6.39.165 6.39.165.105-1.17.75-6.48.855-7.064h-1.2l-1.284 2.91c-1.005 2.28-2.476 2.445-4.11 2.445h-4.906c-1.63 0-2.415-.64-2.415-2.05V12.8s3.62 0 4.79.096c.912.064 1.463.325 1.76 1.598l.39 1.695h1.41l-.09-4.278.192-4.305h-1.391l-.45 1.89c-.283 1.244-.48 1.47-1.754 1.6-1.666.17-4.815.14-4.815.14V2.45h-.05z"/></svg>`,
+  whatsapp: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`,
+  github: `<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>`,
+  linkedin: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13Zm1.78 13.02H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0Z"/></svg>`,
+};
+
+const title = 'Shauna Arnold · Selected links';
+const description =
+  'Portfolio, shop, Hawaiʻi Dog Map, writing and contact links for Shauna Arnold, designer and developer in Honolulu.';
+const canonical = 'https://shauna.dev/';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>{title}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fraunces 700 and JetBrains Mono 700 are used here (the mark, the status
+         line, the section rule) and are not in Layout.astro's font request. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content="https://shauna.digital/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://shauna.digital/images/og-image.jpg" />
+    <meta name="theme-color" content="#F2F5F6" />
+  </head>
+
+  <body class="links-page">
+    <div class="wrap">
+      <header class="masthead">
+        <div class="left">
+          <div class="mark" aria-hidden="true"><LogoS class="mast-mark" /></div>
+          <span class="wordmark">{meta.wordmark}<span class="dot">.</span></span>
+        </div>
+        <div class="right">{meta.kicker}<br />{meta.domain}</div>
+      </header>
+
+      <!-- CONTACT: the only place the offset-shape button gesture appears -->
+      <section class="contact">
+        <div class="say">
+          <p class="status"><span class="d"></span> {contact.status}</p>
+          <p class="lede">{contact.lede}</p>
+          <p class="sub">{contact.sub}</p>
+        </div>
+
+        <div class="links">
+          <a class="pill primary" href={contact.cta.href} target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <rect x="1" y="3" width="14" height="10" rx="2"></rect>
+              <path d="m1.5 4 6.5 4.5L14.5 4"></path>
+            </svg>
+            {contact.cta.label}
+          </a>
+
+          <ul class="icons">
+            {
+              socials.map((s) => (
+                <li>
+                  {/*
+                    A social with no URL yet renders as a disabled button, not an
+                    anchor: href="#" would look live and go nowhere. aria-disabled
+                    + the title make the pending state readable to screen readers.
+                  */}
+                  <Fragment>
+                    {s.placeholder ? (
+                      <span
+                        class="ico is-placeholder"
+                        role="link"
+                        aria-disabled="true"
+                        aria-label={`${s.label}, link coming soon`}
+                        title={`${s.label}, URL not supplied yet`}
+                      >
+                        <Fragment set:html={ICONS[s.icon]} />
+                      </span>
+                    ) : (
+                      <a class="ico" href={s.href} target="_blank" rel="noopener" aria-label={s.label}>
+                        <Fragment set:html={ICONS[s.icon]} />
+                      </a>
+                    )}
+                  </Fragment>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
+
+      <!-- LINKS -->
+      <div class="grid">
+        {
+          bars.map((b) =>
+            b.placeholder ? (
+              <span class={`bar ${b.variant} s${b.span} is-placeholder`} aria-disabled="true">
+                <span class="ttl">{b.title}</span>
+                <span class="tags">
+                  {b.tags.map((t) => (
+                    <span>{t}</span>
+                  ))}
+                  <span class="todo">Link coming soon</span>
+                </span>
+                <span class="go" aria-hidden="true">→</span>
+              </span>
+            ) : (
+              <a class={`bar ${b.variant} s${b.span}`} href={b.href} target="_blank" rel="noopener">
+                <span class="ttl">{b.title}</span>
+                <span class="tags">
+                  {b.tags.map((t) => (
+                    <span>{t}</span>
+                  ))}
+                </span>
+                <span class="go" aria-hidden="true">→</span>
+              </a>
+            ),
+          )
+        }
+
+        <p class="rule">{upcoming.heading}</p>
+
+        {
+          /*
+            In-build projects. Rendered as spans, never anchors, so a link
+            cannot drop people on a parking page or a browser error.
+
+            Note this maps EVERY item to a <span> unconditionally — it does not
+            read `building`, and an href in this list is silently ignored. To
+            take a project live, move its entry into `bars` in links.json (with
+            a variant), which is what Countdown Project and Thread Hawaiʻi did
+            on 2026-08-13. Do not add href-handling here: two renderers for the
+            same bar is how one of them ends up subtly wrong.
+          */
+          upcoming.items.map((p) => (
+            <span
+              class={`bar soon s${p.span} is-placeholder`}
+              aria-disabled="true"
+              aria-label={`${p.title}, in progress, not yet live`}
+            >
+              <span class="ttl">{p.title}</span>
+              <span class="tags">
+                {p.tags.map((t, i) => (i === p.tags.length - 1 ? <span class="todo">{t}</span> : <span>{t}</span>))}
+              </span>
+              <span class="go" aria-hidden="true">→</span>
+            </span>
+          ))
+        }
+
+        <p class="rule">{writing.heading}</p>
+
+        <a class="bar quiet s6" href={latestUrl} target="_blank" rel="noopener">
+          <span class="ttl">{writing.latestTitle}</span>
+          <span class="tags"><span>{writing.latestTag}</span><span>{latestReadTime}</span></span>
+          <span class="go" aria-hidden="true">→</span>
+        </a>
+
+        <a class="bar quiet s6" href={writing.archive.href} target="_blank" rel="noopener">
+          <span class="ttl">{writing.archive.title}</span>
+          <span class="tags"><span>{writing.archive.tag}</span><span>{postCount} posts</span></span>
+          <span class="go" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>{meta.footerLine}</span>
+        <span class="foot-links">
+          <a href={contact.cta.href} target="_blank" rel="noopener">Get in touch</a>
+          <a href="https://shauna.digital" target="_blank" rel="noopener">shauna.digital →</a>
+        </span>
+      </footer>
+    </div>
+  </body>
+</html>
+
+<style>
+  /* Tokens all come from global.css :root. Nothing new is defined here except
+     the page-local button offset, which is smaller than the site's 7px. */
+  .links-page {
+    --btn-offset: 5px;
+    background: var(--paper-2);
+    color: var(--ink);
+    line-height: 1.6;
+    min-height: 100vh;
+    position: relative;
+    /* kills the grey flash iOS paints over tapped links — the :active
+       states below are the real touch feedback */
+    -webkit-tap-highlight-color: transparent;
+  }
+  .links-page::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    /* padding-block/inline, not the shorthand — see CLAUDE.md */
+    padding-block: clamp(40px, 7vw, 68px) calc(72px + env(safe-area-inset-bottom));
+    padding-inline: clamp(22px, 4vw, 32px);
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px 20px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+  .masthead .left { display: flex; align-items: center; gap: 14px; }
+  /* Same treatment as the nav on shauna.digital: the logomark bare and teal,
+     no container. Matches .nav-logo exactly (colour --primary, height 38px),
+     and it is the same artwork as public/favicon.svg, so the browser tab and
+     the masthead now show one object. The teal rounded square with a Fraunces
+     letter "S" that the mockup drew has been dropped. */
+  .mark { display: flex; align-items: center; flex: none; color: var(--primary); }
+  /* :global is REQUIRED: the <svg> is rendered by LogoS.astro and never receives
+     this file's scope attribute, so a plain `.mast-mark` selector cannot match
+     it and the height silently computes to 0. See CLAUDE.md. */
+  .mark :global(.mast-mark) { height: 38px; width: auto; display: block; }
+  .wordmark {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 1.35rem; letter-spacing: -0.02em;
+  }
+  .wordmark .dot { color: var(--primary); }
+  .masthead .right {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-soft); text-align: right;
+  }
+
+  /* ---------- contact band ---------- */
+  .contact {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px 24px; flex-wrap: wrap;
+    background: var(--primary-50); border: 1px solid var(--primary-200);
+    border-radius: 16px; padding: 20px 22px; margin-bottom: 26px;
+  }
+  .contact .say { min-width: 0; }
+  .contact .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent-ink); margin-bottom: 6px;
+  }
+  .contact .status .d {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
+  }
+  .contact .lede {
+    font-family: var(--font-display); font-weight: 600; font-size: 1.18rem;
+    letter-spacing: -0.018em; line-height: 1.2;
+  }
+  .contact .sub { font-size: 0.85rem; color: var(--ink-soft); margin-top: 3px; }
+  .links { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .icons { display: flex; gap: 11px; flex-wrap: wrap; list-style: none; }
+
+  /* =========================================================
+     THE BUTTON GESTURE — CONTACT BAND ONLY.
+     Outlined at rest with a solid shape of the SAME silhouette offset
+     up-right; on hover the shape slides home and the button takes that
+     fill. Zero-blur box-shadow, so it inherits border-radius and can
+     never drift from the button.
+     Keeping this gesture exclusive to the contact band is what makes it
+     read as the page's one call to action. Link bars deliberately do NOT
+     carry it — eight of these would flatten the CTA.
+     ========================================================= */
+  .pill, .ico {
+    border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink);
+    box-shadow: var(--btn-offset) calc(var(--btn-offset) * -1) 0 0 var(--ink);
+    transition: box-shadow 0.3s var(--ease), background 0.3s var(--ease),
+                color 0.3s var(--ease), border-color 0.3s var(--ease);
+  }
+  .pill {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 20px; min-height: 44px;
+    border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 500;
+  }
+  .pill.primary {
+    border-color: var(--primary);
+    box-shadow: var(--btn-offset) calc(var(--btn-offset) * -1) 0 0 var(--primary);
+  }
+  .ico {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; flex: none; position: relative;
+  }
+  /* These SVGs are injected with set:html, so they never receive this
+     component's scope attribute — the size rule MUST be :global() or it
+     computes to height:0 and the icon vanishes. See CLAUDE.md. */
+  .pill :global(svg) { width: 15px; height: 15px; flex: none; }
+  .ico :global(svg) { width: 17px; height: 17px; }
+
+  /* --- press / focus: apply on EVERY device --- */
+  .pill:active, .pill:focus-visible, .ico:active, .ico:focus-visible {
+    box-shadow: 0 0 0 0 var(--ink); background: var(--ink); color: var(--paper);
+  }
+  .pill.primary:active, .pill.primary:focus-visible {
+    background: var(--primary); border-color: var(--primary);
+    box-shadow: 0 0 0 0 var(--primary);
+  }
+  .pill:focus-visible, .ico:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+  /* --- hover: ONLY where a real pointer exists.
+     Without this guard a phone keeps the tapped button in its filled
+     state after you navigate back, because touch has no "un-hover". --- */
+  @media (hover: hover) {
+    .pill:hover, .ico:hover {
+      box-shadow: 0 0 0 0 var(--ink); background: var(--ink); color: var(--paper);
+    }
+    .pill.primary:hover {
+      background: var(--primary); border-color: var(--primary);
+      box-shadow: 0 0 0 0 var(--primary);
+    }
+  }
+
+  /* ---------- grid ---------- */
+  .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .s2 { grid-column: span 2; }
+  .s3 { grid-column: span 3; }
+  .s4 { grid-column: span 4; }
+  .s6 { grid-column: span 6; }
+
+  /* =========================================================
+     LINK BARS
+     ========================================================= */
+  .bar {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--paper); color: var(--ink);
+    /* 12px is the mockup's value; the nearest token (--radius-lg) is 14px,
+       which reads visibly softer at this bar height. Literal on purpose. */
+    border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px 12px 18px; min-height: 56px;
+    transition: background 0.25s var(--ease), color 0.25s var(--ease),
+                border-color 0.25s var(--ease);
+  }
+  .bar .ttl {
+    font-family: var(--font-display); font-weight: 600; font-size: 1.02rem;
+    letter-spacing: -0.015em; line-height: 1.2;
+    flex: none; white-space: nowrap;
+  }
+  /* Writing bars — body font, smaller, lighter weight. These are
+     secondary to the three links above and shouldn't compete with them
+     typographically; dropping Fraunces for Inter does most of that work.
+     The same rule carries the wrapping behaviour, since article headlines
+     run long — kept as ONE rule so the two can't race on specificity. */
+  .bar.quiet .ttl {
+    font-family: var(--font-sans); font-size: 0.92rem; font-weight: 500;
+    letter-spacing: 0; line-height: 1.4;
+    white-space: normal; flex: 1 1 auto; min-width: 0;
+  }
+  .bar.quiet .tags { flex: none; }
+
+  /* tags sit right-aligned, so the bar fills its width without a long sentence */
+  .bar .tags {
+    display: flex; gap: 7px; flex-wrap: wrap;
+    justify-content: flex-end; flex: 1; min-width: 0;
+  }
+  .bar .tags span {
+    font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    padding: 4px 10px; border-radius: var(--radius-pill);
+    border: 1px solid currentColor;
+    /* The mockup put opacity:.5 on the whole pill, which dimmed the LABEL as
+       well as the outline: ink at 50% on white is 3.5:1, and --accent-ink at
+       50% on --primary-50 is 2.2:1 — both fail AA at 0.6rem. The fade belongs
+       on the border only, so the text keeps its variant's full contrast. */
+    border-color: color-mix(in srgb, currentColor 50%, transparent);
+  }
+  .bar .go {
+    flex: none; width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 0.78rem;
+    background: rgba(var(--ink-rgb), 0.07);
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease);
+  }
+
+  /* ---- REST states ---------------------------------------------------
+     All rest-state variants are declared together, BEFORE any hover or
+     active rule. `.bar.tint` and `.bar:hover` have identical specificity
+     (0,2,0), so whichever is written last wins — keeping every rest rule
+     above every interaction rule is what makes the fills reliable
+     instead of order-dependent. */
+  .bar.dark { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .bar.dark .go { background: rgba(var(--paper-rgb), 0.16); }
+
+  .bar.teal { background: var(--primary); color: var(--on-accent); border-color: var(--primary); }
+  .bar.teal .go { background: rgba(var(--paper-rgb), 0.2); }
+
+  .bar.tint { background: var(--primary-50); color: var(--accent-ink); border-color: var(--primary-200); }
+
+  /* ---- PRESS / FOCUS — every device ----------------------------------
+     Every variant states its own background AND colour explicitly, so no
+     fill is inherited across rules that could be reordered later.
+       plain → ink        dark → deep teal
+       teal  → ink        tint → deep teal
+     The deep fills use --primary-hover (#1F6A75), NOT --primary: white on
+     #2C8C99 is only 3.95:1 and fails AA at this text size (CLAUDE.md flags
+     the same ratio for small teal text on white — contrast is symmetric).
+     #1F6A75 is 6.2:1 and is already the system's "deeper teal for hover".
+     NOTE: --primary-deep is NOT that colour in this codebase — global.css
+     defines it as var(--ink). The mockup redefined it locally; using it
+     here would silently fill these bars black. */
+  .bar:active, .bar:focus-visible {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .bar.dark:active, .bar.dark:focus-visible {
+    background: var(--primary-hover); color: var(--paper); border-color: var(--primary-hover);
+  }
+  .bar.teal:active, .bar.teal:focus-visible {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .bar.tint:active, .bar.tint:focus-visible {
+    background: var(--primary-hover); color: var(--paper); border-color: var(--primary-hover);
+  }
+  .bar:active .go, .bar:focus-visible .go { background: rgba(var(--paper-rgb), 0.18); }
+  /* keyboard focus keeps a real ring — the fill alone isn't an accessible
+     focus indicator. Sits on the page background at 3px offset, so it
+     stays visible over every variant. */
+  .bar:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+  /* ---- HOVER — pointer devices only ---- */
+  @media (hover: hover) {
+    .bar:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .bar.dark:hover { background: var(--primary-hover); color: var(--paper); border-color: var(--primary-hover); }
+    .bar.teal:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .bar.tint:hover { background: var(--primary-hover); color: var(--paper); border-color: var(--primary-hover); }
+    .bar:hover .go { background: rgba(var(--paper-rgb), 0.18); transform: rotate(45deg); }
+  }
+
+  /* ---- PLACEHOLDERS --------------------------------------------------
+     Links whose URL hasn't been supplied yet. Rendered as non-anchors so
+     they cannot be clicked into a dead end, and visibly incomplete: dashed
+     border, dimmed, "Link coming soon". They must never read as shippable. */
+  .bar.is-placeholder,
+  .ico.is-placeholder {
+    cursor: not-allowed;
+    border-style: dashed;
+  }
+  /* No blanket opacity here. Fading the whole element washed the teal
+     LaunchKit bar out to a pale mint and changed the palette; the dashed
+     border and the "Link coming soon" tag carry the message instead. */
+  .bar.is-placeholder .go { opacity: 0.45; }
+  .bar .tags .todo {
+    border-style: dashed;
+    border-color: currentColor;
+    font-weight: 700;
+  }
+  /* A placeholder must not wear the offset shape — that gesture is what
+     marks a control as live. Without this the solid shadow sits behind the
+     dashed ring and the two read as one smeared blob. */
+  .ico.is-placeholder { box-shadow: none; }
+  .ico.is-placeholder :global(svg) { opacity: 0.5; }
+
+  /* In-build projects. Distinct from a broken placeholder: these are real
+     work with a name, so the title keeps full ink contrast and only the
+     surface reads as provisional. The tinted ground plus the dashed edge
+     says "coming", the dimmed arrow says "not yet". */
+  .bar.soon {
+    background: var(--primary-50);
+    color: var(--ink);
+    border-color: var(--primary-200);
+  }
+  .bar.soon .go { background: rgba(var(--primary-rgb), 0.12); opacity: 0.5; }
+  @media (hover: hover) {
+    .bar.soon.is-placeholder:hover {
+      background: var(--primary-50);
+      color: var(--ink);
+      border-color: var(--primary-200);
+    }
+  }
+  /* placeholders never take an interaction fill */
+  .bar.is-placeholder:active, .ico.is-placeholder:active { box-shadow: none; }
+  @media (hover: hover) {
+    .bar.is-placeholder:hover {
+      background: var(--paper); color: var(--ink); border-color: var(--line);
+    }
+    .bar.teal.is-placeholder:hover {
+      background: var(--primary); color: var(--on-accent); border-color: var(--primary);
+    }
+    .bar.is-placeholder:hover .go { transform: none; }
+    .ico.is-placeholder:hover {
+      background: var(--paper); color: var(--ink); border-color: var(--ink);
+      box-shadow: var(--btn-offset) calc(var(--btn-offset) * -1) 0 0 var(--ink);
+    }
+  }
+
+  /* section rule */
+  .rule {
+    grid-column: span 6; display: flex; align-items: center; gap: 14px;
+    margin: 14px 0 0;
+    font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .rule::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+  footer {
+    margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 10px 14px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-soft);
+  }
+  /* inline-flex + min-height gives the footer links a 44px tap target
+     (§ accessibility) without moving the text — they measured 18px tall in
+     the mockup, which is a miss on touch. */
+  footer a {
+    color: var(--accent-ink); font-weight: 500;
+    display: inline-flex; align-items: center; min-height: 44px;
+  }
+  .foot-links { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+  @media (hover: hover) {
+    footer a:hover { text-decoration: underline; }
+  }
+
+  /* =========================================================
+     MOBILE
+     ========================================================= */
+  @media (max-width: 760px) {
+    /* every bar is full width now, so a 6-column grid buys nothing */
+    .grid { grid-template-columns: 1fr; gap: 10px; }
+    .s2, .s3, .s4, .s6, .rule { grid-column: auto; }
+    .masthead { margin-bottom: 24px; }
+  }
+
+  @media (max-width: 560px) {
+    .masthead { align-items: center; }
+    .masthead .right { font-size: 0.64rem; line-height: 1.5; }
+
+    .contact { flex-direction: column; align-items: stretch; gap: 18px; padding: 18px; }
+    .links { flex-direction: column; align-items: stretch; gap: 16px; }
+    /* 4 across, 2 rows — 8 icons in one row overflows a 360px screen */
+    .icons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; justify-items: center; }
+
+    /* Line 1: title + arrow. Line 2: tags.
+       `order` is doing the work — in source order .tags sits before .go,
+       so without it a wrapping .tags would push the arrow to a third line. */
+    .bar { flex-wrap: wrap; gap: 8px 12px; padding: 13px 14px 13px 16px; }
+    .bar .ttl { white-space: normal; flex: 1 1 auto; order: 1; }
+    .bar .go { order: 2; }
+    .bar .tags { order: 3; flex: 1 0 100%; justify-content: flex-start; }
+  }
+
+  /* global.css's reduced-motion block only kills `animation`; this page is
+     driven by transitions, so it needs its own guard. */
+  @media (prefers-reduced-motion: reduce) {
+    .links-page *,
+    .links-page *::before,
+    .links-page *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>

@@ -1,0 +1,139 @@
+{
+  "_comment": [
+    "Drives the link-in-bio page at /links (served as https://shauna.dev/).",
+    "Adding a link = adding one entry. Nothing else needs to change.",
+    "",
+    "bars[].variant  plain | dark | teal | tint | quiet   (see links.astro rest-state block)",
+    "bars[].span     grid columns out of 6. Everything is 6 today; 3 gives a half-width bar.",
+    "bars[].href     omit or null + \"placeholder\": true to render a non-linking TBD bar.",
+    "",
+    "The Writing section points at shauna.digital's blog and is HARDCODED below.",
+    "It used to be derived from the blog content collection, which meant this repo",
+    "had to carry all 13 posts just to count them. Publishing a post on",
+    "shauna.digital no longer updates this page: bump postCount, latestPostSlug,",
+    "latestTitle and latestReadTime by hand. Last synced 2026-08-13 against the",
+    "live page. Nothing validates these — a wrong slug is a 404 nobody notices."
+  ],
+
+  "meta": {
+    "wordmark": "Shauna",
+    "kicker": "Selected links",
+    "domain": "shauna.dev",
+    "footerLine": "© 2026 Shauna Arnold · Honolulu, HI"
+  },
+
+  "contact": {
+    "status": "Taking a few projects for Q4",
+    "lede": "Let’s talk about your project.",
+    "sub": "I take a few at a time, so I answer everything myself.",
+    "cta": { "label": "Get in touch", "href": "https://shauna.digital/#contact" }
+  },
+
+  "socials": [
+    { "icon": "instagram", "label": "Instagram", "href": "https://www.instagram.com/shaunadev_" },
+    { "icon": "tiktok", "label": "TikTok", "href": "https://www.tiktok.com/@shauna.dev" },
+    { "icon": "substack", "label": "Substack", "href": "https://byshauna.substack.com" },
+    { "icon": "etsy", "label": "Etsy shop", "href": "https://www.etsy.com/shop/launchkitus" },
+    {
+      "_note": "WhatsApp INVITE link (wa.me/qr/...), deliberately not wa.me/<number>. A number-form link would publish Shauna's personal mobile in the page source for scrapers; this opaque code does not. Tradeoff: it carries no prefilled message, and it BREAKS SILENTLY if the QR is ever reset in WhatsApp. If that happens, re-copy the link from the app. Verified resolving 2026-08-12.",
+      "icon": "whatsapp",
+      "label": "WhatsApp",
+      "href": "https://wa.me/qr/P54OK6KL2T7IF1"
+    },
+    { "icon": "github", "label": "GitHub", "href": "https://github.com/shaunagits" },
+    { "icon": "linkedin", "label": "LinkedIn", "href": "https://www.linkedin.com/in/shaunaarnold/" }
+  ],
+
+  "bars": [
+    {
+      "title": "My Portfolio",
+      "href": "https://shauna.digital",
+      "variant": "dark",
+      "span": 6,
+      "tags": ["Case studies", "Services"]
+    },
+    {
+      "_note": "launchkit.us was NOT resolving as of 2026-08-12 (apex has no A record; www had a TLS name mismatch). Shauna's call: link it anyway, site going live same day. See LAUNCHKIT-DOMAIN.md. If it is still down, set href to null and placeholder to true to put the bar back to 'Link coming soon'.",
+      "title": "Shop LaunchKits",
+      "href": "https://launchkit.us",
+      "variant": "teal",
+      "span": 6,
+      "tags": ["Brand kits", "Etsy & Shopify"]
+    },
+    {
+      "title": "Hawaiʻi Dog Map",
+      "href": "https://hawaiidogmap.com",
+      "variant": "tint",
+      "span": 6,
+      "tags": ["Dog-friendly spots", "4 islands"]
+    },
+    {
+      "_note": "Was an 'In build' bar under upcoming until 2026-08-13. Verified live that day: 200 over HTTPS, served by Vercel, real site (not a Namecheap URL forward).",
+      "title": "Thread Hawaiʻi",
+      "href": "https://threadhawaii.com",
+      "variant": "plain",
+      "span": 6,
+      "tags": ["My agency", "Custom software"]
+    },
+    {
+      "_note": "Was an 'In build' bar until 2026-08-13. Verified live that day: 200 over HTTPS, Vercel. NOTE: the live site brands itself 'The ʻĪlio Project'; the label here is 'Countdown Project' by Shauna's explicit call (2026-08-13). If the site's branding is the one that sticks, this label is what needs changing.",
+      "title": "Countdown Project",
+      "href": "https://countdownproject.org",
+      "variant": "plain",
+      "span": 6,
+      "tags": ["Nonprofit", "Spay and neuter access"]
+    },
+    {
+      "_note": "Verified live 2026-08-13: 200 over HTTPS, served by Netlify.",
+      "title": "Aloha Animal Outreach",
+      "href": "https://alohaanimaloutreach.org",
+      "variant": "plain",
+      "span": 6,
+      "tags": ["Nonprofit", "Donate"]
+    }
+  ],
+
+  "upcoming": {
+    "_comment": [
+      "Projects in build. Rendered as NON-LINKING bars. Countdown Project and",
+      "Thread Hawaiʻi both went live and MOVED UP to \"bars\" on 2026-08-13.",
+      "Island Bound is the only one left: no domain is registered for it yet and",
+      "the repo is still pre-implementation (Phase 0 research complete), so there",
+      "is nothing to link.",
+      "",
+      "TO TAKE IT LIVE: move the entry into \"bars\" with an href and a variant.",
+      "Do NOT just add an href here — index.astro renders every item in this list",
+      "as a <span>, unconditionally. It never reads the \"building\" flag, so an",
+      "href on this side is silently ignored. (The old comment claimed otherwise.)",
+      "",
+      "Verify the URL actually serves before linking it: the standing trap on",
+      "these domains is a Namecheap URL Redirect Record answering with",
+      "'X-Served-By: Namecheap URL Forward', which looks alive but is a parking",
+      "page. Delete that record FIRST, then point DNS at the host."
+    ],
+    "heading": "Building now",
+    "items": [
+      {
+        "title": "Island Bound Hawaiʻi",
+        "href": null,
+        "building": true,
+        "span": 6,
+        "tags": ["SaaS", "Moving pets to Hawaiʻi", "In build"]
+      }
+    ]
+  },
+
+  "writing": {
+    "heading": "Writing",
+    "postCount": 13,
+    "latestPostSlug": "what-the-world-has-learned-about-stray-dogs",
+    "latestTitle": "What the World Has Learned About Stray Dogs, and What Oʻahu Can Do in Its Own Backyard",
+    "latestReadTime": "9 min",
+    "latestTag": "Latest",
+    "archive": {
+      "title": "All Posts",
+      "href": "https://shauna.digital/blog",
+      "tag": "Archive"
+    }
+  }
+}

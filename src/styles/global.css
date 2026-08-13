@@ -1,0 +1,252 @@
+/* =============================================
+   DESIGN TOKENS  — black + white + one teal accent
+   Change the theme from here.
+   Palette is strictly: white, black, and #2C8C99 (plus shades of those).
+   ============================================= */
+:root {
+  /* ---- Channels ------------------------------------------------------------
+     Three RGB triplets are the ONLY colour literals in the system. Every other
+     colour below is one of these, or one of these at an alpha. Change the brand
+     by editing --primary-rgb and --ink-rgb; nothing else hardcodes a colour.
+
+     The neutrals are deliberately NOT pure greys: --ink carries a trace of the
+     brand hue (~192°), so black, grey and teal read as one family instead of
+     greyscale with an accent stuck on top. It is still black to the eye —
+     18.6:1 on white, where pure #000 is 21:1. */
+  --primary-rgb: 44, 140, 153;   /* #2C8C99 — the one brand hue */
+  --ink-rgb: 11, 20, 22;         /* #0B1416 — hue-shifted near-black */
+  --paper-rgb: 255, 255, 255;    /* #FFFFFF — white stays pure white */
+
+  /* Brand */
+  --paper: rgb(var(--paper-rgb));  /* page base */
+  --paper-2: #F2F5F6;              /* alt band — white pulled toward the hue */
+  --ink: rgb(var(--ink-rgb));      /* text + dark sections */
+  --ink-soft: #55656A;             /* muted text — grey pulled toward the hue, 6.1:1 */
+  --primary: rgb(var(--primary-rgb));
+  --primary-hover: #1F6A75;        /* deeper teal for CTA hover */
+  --primary-deep: var(--ink);      /* dark sections (about / footer) */
+  --accent: var(--primary);
+  --accent-ink: #1F6A75;           /* deeper teal — for SMALL teal text on white (AA) */
+  --on-accent: var(--paper);       /* text/icon colour on the accent fill */
+
+  /* Accent ramp — the same hue at three tint levels. Card stages and any
+     teal-tinted surface pull from here rather than inventing a hex. */
+  --primary-50: #F1F7F8;
+  --primary-100: #E7EDEF;
+  --primary-200: #DCE9EC;
+
+  /* Surfaces / lines — derived from ink, so they inherit the hue automatically */
+  --line: rgba(var(--ink-rgb), 0.13);
+  --line-strong: rgba(var(--ink-rgb), 0.26);
+
+  /* Text on dark sections */
+  --on-dark: var(--paper);
+  --on-dark-2: rgba(var(--paper-rgb), 0.80);
+  --on-dark-3: rgba(var(--paper-rgb), 0.58);
+  --on-dark-line: rgba(var(--paper-rgb), 0.16);
+
+  /* Legacy aliases (kept so any stray refs still resolve) */
+  --c-bg: var(--paper);
+  --c-bg-subtle: var(--paper-2);
+  --c-text: var(--ink);
+  --c-text-muted: var(--ink-soft);
+  --c-border: var(--line);
+  --c-accent: var(--primary);
+
+  /* Typography */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Layout */
+  --container-max: 1240px;
+  --container-px: clamp(24px, 5vw, 40px);
+  --section-py: clamp(72px, 10vw, 104px);
+
+  /* Offset of the accent shape behind the primary button */
+  --btn-offset: 7px;
+
+  /* Radii */
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 100px;
+  --radius-sm: 8px;
+
+  /* Shadows — ink-derived, so they read as the hue's own shadow, not grey haze */
+  --shadow-sm: 0 1px 2px rgba(var(--ink-rgb), 0.12);
+  --shadow-btn: 0 12px 26px -10px rgba(var(--primary-rgb), 0.5);
+  --shadow-media: 0 20px 46px -20px rgba(var(--ink-rgb), 0.35);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 0.45s;
+  --transition-fast: 150ms ease;
+  --transition-mid: 300ms ease;
+}
+
+/* =============================================
+   RESET
+   ============================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+  position: relative;
+}
+img, video { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font: inherit; color: inherit; }
+::selection { background: var(--primary); color: var(--paper); }
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* subtle paper grain */
+body::after {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* =============================================
+   LAYOUT
+   ============================================= */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-px);
+}
+.container--narrow { max-width: 760px; }
+
+/* scroll progress */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 2px; width: 0;
+  background: var(--accent); z-index: 100;
+}
+
+/* =============================================
+   TYPE UTILITIES
+   ============================================= */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.heading-section {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.heading-card {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.4vw, 2.35rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.body-text {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+/* Secondary. Sibling of .btn-primary: same silhouette, same offset, same choreography —
+   but the shape behind is a HOLLOW teal ring instead of a solid fill, so it sits a step
+   quieter than the primary. On hover the ring slides home and becomes the button's own
+   outline (black -> teal); the fill stays white, leaving the teal fill to the primary.
+   The ring is faked with two stacked shadows, the inner one knocked out in --paper —
+   so .btn must sit on a --paper background (it does: the hero). On a tinted or dark
+   band the knockout would show. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.7rem 1.375rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans); font-size: 0.875rem; font-weight: 500;
+  /* Solid black shape, single shadow. This used to stack a --paper knockout at
+     -1.5px spread on top of a teal shape, which hollowed it into a ring; the
+     knockout is gone, so the offset pillbox now reads as one solid silhouette.
+     Ink, not teal — the accent stays reserved for .btn-primary, so the two
+     buttons no longer compete when they sit side by side. */
+  box-shadow: var(--btn-offset) calc(var(--btn-offset) * -1) 0 0 var(--ink);
+  transition: background 0.25s var(--ease), color 0.25s var(--ease),
+              border-color 0.28s var(--ease), box-shadow 0.34s var(--ease),
+              transform 0.12s var(--ease);
+}
+/* Same choreography as .btn-primary: the offset shape slides home and the button
+   takes its fill — ink here rather than accent. --paper, not --on-accent: that
+   token means "on the accent", and this is on the ink. Same value today, but it
+   would be wrong the day the accent changes. */
+.btn:hover, .btn:focus-visible {
+  background: var(--ink); color: var(--paper); border-color: var(--ink);
+  box-shadow: 0 0 0 0 var(--ink);
+  transform: none;
+}
+.btn:active { transform: scale(0.97); }
+/* Outlined at rest, with a solid accent shape of the SAME silhouette offset up-right
+   behind it (a zero-blur box-shadow inherits the border-radius, so the shape can never
+   drift from the button). On hover/focus the shape slides home and the button takes the
+   accent fill — the offset resolves into the button. */
+.btn-primary {
+  background: var(--paper); color: var(--ink); border-color: var(--ink);
+  box-shadow: var(--btn-offset) calc(var(--btn-offset) * -1) 0 0 var(--primary);
+  transition: background 0.28s var(--ease), color 0.28s var(--ease),
+              border-color 0.28s var(--ease), box-shadow 0.34s var(--ease),
+              transform 0.12s var(--ease);
+}
+.btn-primary:hover, .btn-primary:focus-visible {
+  background: var(--primary); border-color: var(--primary); color: var(--on-accent);
+  box-shadow: 0 0 0 0 var(--primary); transform: none;
+}
+.btn-primary:active { transform: scale(0.97); }
+
+/* =============================================
+   SCROLL ANIMATIONS
+   ============================================= */
+[data-animate] {
+  opacity: 0; transform: translateY(14px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+[data-animate].is-visible { opacity: 1; transform: none; }
+[data-animate][data-delay="1"] { transition-delay: 0.04s; }
+[data-animate][data-delay="2"] { transition-delay: 0.08s; }
+[data-animate][data-delay="3"] { transition-delay: 0.12s; }
+[data-animate][data-delay="4"] { transition-delay: 0.16s; }
+[data-animate][data-delay="5"] { transition-delay: 0.20s; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] { opacity: 1; transform: none; transition: none; }
+  * { animation: none !important; }
+  /* keep the colour swap, drop the travel */
+  .btn-primary { transition: background 0.28s, color 0.28s, border-color 0.28s; }
+  .btn-primary:active { transform: none; }
+}

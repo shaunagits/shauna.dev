@@ -1,0 +1,41 @@
+# shauna.dev — standalone site.
+#
+# NOT YET WIRED TO NETLIFY. Production shauna.dev is still served by the
+# portfolio-2026 repo via host-rewrite rules in ITS netlify.toml. See README.md.
+#
+# Note what is NOT in this file: there are no [[redirects]] at all. The whole
+# point of splitting the site out is that shauna.dev serves its own root
+# directly, so the rewrite/301 stack that portfolio-2026 needs is dead weight
+# here. If you find yourself adding a host-keyed rule below, stop — that is the
+# old architecture, and it means the split didn't happen.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Carried over verbatim from portfolio-2026, where this exact header set is
+# verified working against this page under the live CSP (zero console errors).
+# Two entries are inherited rather than needed: `connect-src`/`form-action`
+# name formspree, and there is no form on this page. Tighten only with a deploy
+# preview open — a CSP mistake renders the page unstyled, not broken-looking.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://formspree.io; form-action https://formspree.io"
+
+# Fingerprinted build assets — safe to cache forever.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Images are not fingerprinted: cache, but let them revalidate.
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
