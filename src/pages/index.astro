@@ -23,13 +23,15 @@ import links from '../data/links.json';
 const { meta, contact, socials, bars, upcoming, writing } = links;
 
 // --- Writing section: hardcoded, and that is the tradeoff ----------------
-// In portfolio-2026 these came from getCollection('blog'), so the count and
-// read time could not go stale. That required this repo to carry all 13 posts
-// and their MDX components purely to count them — for a number that changes a
-// few times a year. Decoupled 2026-08-13; the blog now lives only in
-// portfolio-2026. Cost: publishing a post there silently makes this page wrong
-// until links.json is updated by hand.
-const postCount = writing.postCount;
+// In portfolio-2026 these came from getCollection('blog'), which meant carrying
+// all 13 posts and their MDX components in this repo purely to count them.
+// Decoupled 2026-08-13; the blog now lives only in portfolio-2026.
+//
+// The post count was dropped entirely on 2026-08-14 — these are just two links,
+// one to an article and one to the archive, and a total added nothing. That
+// removed the field most likely to drift: a count is wrong the moment anything
+// is published, whereas the pinned post below is only wrong once something
+// newer exists. What is left still needs a hand edit when that happens.
 const latestUrl = `https://shauna.digital/blog/${writing.latestPostSlug}`;
 const latestReadTime = writing.latestReadTime;
 
@@ -237,7 +239,7 @@ const canonical = 'https://shauna.dev/';
 
         <a class="bar quiet s6" href={writing.archive.href} target="_blank" rel="noopener">
           <span class="ttl">{writing.archive.title}</span>
-          <span class="tags"><span>{writing.archive.tag}</span><span>{postCount} posts</span></span>
+          <span class="tags"><span>{writing.archive.tag}</span></span>
           <span class="go" aria-hidden="true">→</span>
         </a>
       </div>

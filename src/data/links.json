@@ -10,9 +10,13 @@
     "The Writing section points at shauna.digital's blog and is HARDCODED below.",
     "It used to be derived from the blog content collection, which meant this repo",
     "had to carry all 13 posts just to count them. Publishing a post on",
-    "shauna.digital no longer updates this page: bump postCount, latestPostSlug,",
-    "latestTitle and latestReadTime by hand. Last synced 2026-08-13 against the",
-    "live page. Nothing validates these — a wrong slug is a 404 nobody notices."
+    "shauna.digital no longer updates this page: bump latestPostSlug, latestTitle",
+    "and latestReadTime by hand. Verified correct 2026-08-14 against the live blog.",
+    "Nothing validates these — a wrong slug is a 404 nobody notices.",
+    "",
+    "postCount was removed 2026-08-14. These are two links, one to an article and",
+    "one to the archive; a total added nothing and was the field most certain to",
+    "go stale, since any new post makes a count wrong immediately."
   ],
 
   "meta": {
@@ -133,7 +137,6 @@
 
   "writing": {
     "heading": "Writing",
-    "postCount": 13,
     "latestPostSlug": "what-the-world-has-learned-about-stray-dogs",
     "latestTitle": "What the World Has Learned About Stray Dogs, and What Oʻahu Can Do in Its Own Backyard",
     "latestReadTime": "9 min",
