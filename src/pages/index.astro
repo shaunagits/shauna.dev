@@ -27,13 +27,11 @@ const { meta, contact, socials, bars, upcoming, writing } = links;
 // all 13 posts and their MDX components in this repo purely to count them.
 // Decoupled 2026-08-13; the blog now lives only in portfolio-2026.
 //
-// The post count was dropped entirely on 2026-08-14 — these are just two links,
-// one to an article and one to the archive, and a total added nothing. That
-// removed the field most likely to drift: a count is wrong the moment anything
-// is published, whereas the pinned post below is only wrong once something
-// newer exists. What is left still needs a hand edit when that happens.
+// The post count and the read time were both dropped on 2026-08-14 — these are
+// two links, one to an article and one to the archive, and the numbers added
+// nothing to either. That also shrank what can go stale down to two fields:
+// the pinned slug and its title, wrong only once something newer is published.
 const latestUrl = `https://shauna.digital/blog/${writing.latestPostSlug}`;
-const latestReadTime = writing.latestReadTime;
 
 /**
  * Icon artwork, keyed by links.json `socials[].icon`.
@@ -233,7 +231,7 @@ const canonical = 'https://shauna.dev/';
 
         <a class="bar quiet s6" href={latestUrl} target="_blank" rel="noopener">
           <span class="ttl">{writing.latestTitle}</span>
-          <span class="tags"><span>{writing.latestTag}</span><span>{latestReadTime}</span></span>
+          <span class="tags"><span>{writing.latestTag}</span></span>
           <span class="go" aria-hidden="true">→</span>
         </a>
 

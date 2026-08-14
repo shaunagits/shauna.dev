@@ -10,13 +10,18 @@
     "The Writing section points at shauna.digital's blog and is HARDCODED below.",
     "It used to be derived from the blog content collection, which meant this repo",
     "had to carry all 13 posts just to count them. Publishing a post on",
-    "shauna.digital no longer updates this page: bump latestPostSlug, latestTitle",
-    "and latestReadTime by hand. Verified correct 2026-08-14 against the live blog.",
-    "Nothing validates these — a wrong slug is a 404 nobody notices.",
+    "shauna.digital no longer updates this page: bump latestPostSlug and",
+    "latestTitle by hand. Verified 2026-08-14 against the live blog. Nothing",
+    "validates them — a wrong slug is a 404 nobody notices.",
     "",
-    "postCount was removed 2026-08-14. These are two links, one to an article and",
-    "one to the archive; a total added nothing and was the field most certain to",
-    "go stale, since any new post makes a count wrong immediately."
+    "postCount and latestReadTime were both removed 2026-08-14. These are two",
+    "links, one to an article and one to the archive, and the numbers added",
+    "nothing. Losing the count also removed the field most certain to go stale,",
+    "since any new post makes a total wrong immediately.",
+    "",
+    "latestTitle must match the post's frontmatter in portfolio-2026 exactly.",
+    "All 13 titles were converted to sentence case on 2026-08-14; a Title Case",
+    "string here would show the same article differently on the two sites."
   ],
 
   "meta": {
@@ -138,8 +143,7 @@
   "writing": {
     "heading": "Writing",
     "latestPostSlug": "what-the-world-has-learned-about-stray-dogs",
-    "latestTitle": "What the World Has Learned About Stray Dogs, and What Oʻahu Can Do in Its Own Backyard",
-    "latestReadTime": "9 min",
+    "latestTitle": "What the world has learned about stray dogs, and what Oʻahu can do in its own backyard",
     "latestTag": "Latest",
     "archive": {
       "title": "All Posts",
