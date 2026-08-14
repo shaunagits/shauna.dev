@@ -6,23 +6,21 @@ The link-in-bio page at <https://shauna.dev/>. Astro, one page, no framework.
 npm install && npm run dev
 ```
 
-## Read this before you edit anything
+## This repo is the live site
 
-**This folder does not deploy yet.** Production `shauna.dev` is still served by
-the **portfolio-2026** repo at
-`/Users/shauna/Desktop/claudecode/shauna.digital/portfolio`, which reaches this
-domain through host-rewrite rules in its `netlify.toml`.
+`shauna.dev` and `www.shauna.dev` are served from here — Netlify project
+`shauna-dev`, its own certificate, cut over **2026-08-13**.
 
-So right now there are two copies of this page:
+**Push to `main` and it ships.** Continuous deploy is connected and verified;
+no CLI step is needed. `netlify deploy --build --prod` still works as a fallback
+if a build fails.
 
-| | portfolio-2026 | this folder |
-|---|---|---|
-| Route | `/links` | `/` |
-| Serves shauna.dev | **yes, today** | not yet |
-| Netlify site | `f63775ef-…` | none |
+To change what is on the page, edit `src/data/links.json` — one entry per link,
+nothing else to touch — and push.
 
-Editing here changes nothing on the live site until the cutover below is done.
-Until then, **edit the copy in portfolio-2026**, or do both.
+There is no second copy any more. portfolio-2026 no longer contains this page
+and no longer has host rules for this domain; `shauna.digital/links` is a 301
+to here. Do not go looking for something to keep in sync.
 
 ## What's here
 

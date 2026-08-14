@@ -1,18 +1,18 @@
 # CUTOVER — making this repo the real shauna.dev
 
-Status: **PAUSED AT STEP 3 of 7.** Production `shauna.dev` is still served by
-portfolio-2026 via the `byshauna` Netlify site.
+Status: **COMPLETE — all 7 steps done 2026-08-13.**
 
-Steps 1 and 2 are done: the new site is built, deployed and verified at
-<https://shauna-dev.netlify.app>. Nothing points at it yet, so nothing is live
-and nothing is at risk while this sits.
+`shauna.dev` and `www.shauna.dev` are served by the `shauna-dev` Netlify
+project from this repo, on their own certificate. `www` 301s to the apex.
+portfolio-2026 no longer carries the page or any host rules for this domain,
+and `shauna.digital/links` 301s here. `shauna.digital` was unaffected
+throughout.
 
-Paused on 2026-08-13 because Namecheap was down for scheduled maintenance, and
-step 4 happens there. **Do not start step 3 without being able to finish step 4** —
-they are the pair that opens the `www` gap, and step 3 alone leaves
-`www.shauna.dev` 404ing with no way to close it.
+Kept as a record, not a runbook. The two things worth reading before touching
+domains again are **step 3** (why the API must not be used) and **what it cost**
+at the bottom.
 
-Written 2026-08-13. Supersedes the 5-step sketch in `README.md`.
+Written 2026-08-13.
 
 ## The two sites
 
@@ -235,3 +235,34 @@ still works and is the fallback if a build fails, but it is no longer required.
   registered and the repo is pre-implementation.
 - The Writing section is hardcoded now and will go stale when you publish on
   shauna.digital. See `README.md`.
+
+## What it cost, and why
+
+The plan was sound. The execution cost roughly an hour of `shauna.dev` downtime,
+all of it from one avoidable decision.
+
+**The mistake:** doing the domain move through two `netlify api updateSite`
+calls when step 3 of this very document said to use the UI. The release
+succeeded, the claim 422'd, and the domain was stranded — released by one site,
+refused by the other.
+
+**Why it compounded:** rolling back consumed two of the three hourly
+`domain_aliases` changes allowed on the plan. The legitimate removal during the
+real cutover was the third, which meant the next necessary change was blocked
+for ~40 minutes — with the apex down and rollback blocked by the same limit.
+The 3.5-minute outage was the mistake; the ~1 hour was the rate limit.
+
+**The wrong assumption:** that the apex could move alone, needing no DNS change,
+because `75.2.60.5` is Netlify's shared load balancer. The IP part is true. What
+is also true is that **Netlify treats the apex and `www` as one domain** — while
+`byshauna` held `www.shauna.dev`, `shauna.dev` read as in use by another
+project. That is what produced both the API 422 and the identical UI error. The
+Namecheap edit was never actually avoidable.
+
+**What held:** the prediction that removing `www` from `byshauna` would unblock
+the apex claim. It did, immediately.
+
+**Rules for next time.** Domain moves go through the UI, which reassigns in one
+operation. Check the plan's rate limits before the first change, not after.
+Where a rollback shares a quota with the thing being rolled back, the quota is
+part of the blast radius.
