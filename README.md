@@ -37,14 +37,23 @@ No integrations, no `sharp`, no content collections. One page, one stylesheet.
 
 This is the one thing that can silently rot. In portfolio-2026 the post count
 and latest post came from `getCollection('blog')`, so they could not be wrong.
-That required this repo to carry all 13 posts and their MDX components purely
-to count them — for a number that changes a few times a year.
+That required this repo to carry all 13 blog posts and their MDX components
+purely to count them — for a number that changed a few times a year.
 
-Decoupled on 2026-08-13: the values live in `links.json` under `writing`
-(`postCount`, `latestPostSlug`, `latestTitle`, `latestReadTime`), and the blog
-now exists only in portfolio-2026. **Publish a post there and this page is
-wrong until you update those four fields by hand.** Nothing validates them; a
-wrong slug is a 404 nobody notices.
+Decoupled 2026-08-13, then narrowed on 2026-08-14 when the post count and read
+time were dropped from the design. Two fields are left, in `links.json` under
+`writing`:
+
+| field | must match |
+|---|---|
+| `latestPostSlug` | the post's **filename** in portfolio-2026 (`src/content/blog/`) |
+| `latestTitle` | that post's frontmatter `title:`, **exactly** |
+
+**Publish a newer post on shauna.digital and this page keeps pointing at the
+old one until you edit those two by hand.** Nothing validates them: a wrong
+slug is a 404 nobody notices, and a title that drifts from the frontmatter
+shows the same article differently on the two sites. All 13 titles are
+sentence case as of 2026-08-14 — match that.
 
 `og:image` points at `https://shauna.digital/images/og-image.jpg`. The file is
 in `public/images/` too, so you can switch to a local path, but the absolute
